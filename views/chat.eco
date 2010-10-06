@@ -1,0 +1,48 @@
+<% @title = "#{@room} - Lolgebra Chatroom" %>
+<% @css '/css/chat.css' %>
+<% @js "http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" %>
+<% @js "http://laughinghan.github.com/mathquill/mathquill.js" %>
+<% @js "/socket.io/socket.io.js" %>
+<% @js '/js/chat.js' %>
+
+<script type="text/javascript">
+//Page Data
+window.ROOM = <%- JSON.stringify(@room) %>;
+window.USERNAME = <%- JSON.stringify(@user) %>;
+</script>
+
+<h1 id="title"><%=@room_name%></h1>
+<% if @username: %>
+  <span id="name">
+    <span>name:</span>
+    <span><%- @username %></span>
+  </span>
+<% end %>
+<p id="tagline">
+  a <a href="/">lolgebra</a> chatroom:
+  <i><a href="http://laughinghan.github.com/mathquill">MathQuill</a>-powered chatrooms where you can "LOL" in math!  </i>
+
+<div id="chatbox">
+  <p id="loading">Loading...</p>
+</div>
+<span class="mathquill-textbox"></span>
+
+<small>
+  (Type a dollar sign <code>$</code> to enter math mode, then in math mode try
+  <code>x^2</code> or <code>3/4</code> and the arrow keys to move around. Type
+  two dollar signs <code>$$</code> to enter an actual dollar character.
+  <span style="display:none">
+    You can also try using the tab key instead of arrow keys, which 
+    gets you &quot;out&quot; of a command, and <code>a_n</code> for 
+    subscripts. Numerous LaTeX-style commands preceded by a backslash,
+    such as <code>\theta</code>[space or enter], are supported as well.
+    Another example is <code>\sqrt2</code>.
+    <a id="less" href="javascript:void(0)" onclick="
+      $(this).parent().hide().next().show();
+    ">&laquo;&nbsp;less</a>
+  </span>
+  <a id="more" href="javascript:void(0)" onclick="
+    $(this).hide().prev().show();
+  ">more&nbsp;&raquo;</a>
+  )
+</small>

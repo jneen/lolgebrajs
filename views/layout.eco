@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= @title || "Lolgebra" %></title>
+    <% @css('/stylesheets/style.css') %>
+    <%- @renderCSS() %>
+    <%- @renderJS() %>
+  </head>
+<body>
+  <%- @body %>
+</body>

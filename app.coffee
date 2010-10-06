@@ -1,34 +1,34 @@
-express = require('express')
-connect = require('connect')
+Express = require 'express'
+IO = require 'socket.io'
+Eco = require 'eco'
+helpers = require './helpers'
 
-app = module.exports = express.createServer()
+app = Express.createServer(
+  Express.logger()
+  Express.bodyDecoder()
+)
 
-# Config
-
-app.configure ->
-    app.set 'views', __dirname + '/views'
-
-    # middleware stack!
-    app.use connect.bodyDecoder()
-    app.use connect.methodOverride()
-    app.use app.router
+app.register '.eco'
+  render: (template, options) ->
+    Eco.render template, options.locals
 
 app.configure 'development', ->
-    app.use connect.staticProvider(__dirname + '/public')
-    app.use connect.errorHandler(dumpExceptions: true, showStack: true)
+    app.use Express.staticProvider(__dirname + '/public')
 
-# Routes
+require('./models')(app)
 
 app.get '/', (req, res) ->
-    res.render 'index.html.ejs'
-        locals:
-            title: 'Express'
+    res.send('Hello, World!')
 
-app.post '/chat/:room', (req, res) ->
-    roomName = req.param('room').toLowerCase()
-    userName = req.param('name') || req.cookies.username
+app.helpers(helpers.static)
+app.dynamicHelpers(helpers.dynamic)
 
-FayeAdapter = require('faye').NodeAdapter
-new FayeAdapter(mount: '/faye', timeout: 45).attach(app)
+app.get '/chat/:room', (req, res) ->
+    res.render 'chat.eco',
+      locals:
+        room: req.params.room
+        user: (req.params.user || '')
 
-app.listen 3000 unless module.parent
+require('./messages')(app)
+
+app.listen(8080)

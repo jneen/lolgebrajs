@@ -1,5 +1,8 @@
-redis = require('redis-client').createServer()
+Redis = require 'redis'
 
-module.exports =
-  Room: require('./models/room')(redis)
-  OtherModel: require('./models/other_model')(redis)
+module.exports = (app) ->
+  app.models = {}
+
+  #TODO: configure by env
+  app.models.redis = Redis.createClient()
+  require('./models/room')(app.models)

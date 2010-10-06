@@ -1,23 +1,52 @@
-module.exports = (redis) ->
-    keyify = -> ['lolgebra', Array.slice.call(arguments)...].join(':')
+fixBuffers = (o) ->
+  Object.keys(o).forEach (e) ->
+    o[e] = o[e].toString()
+  return o
 
-    name_key = (name) -> keyify('room', 'by_name', name)
+module.exports = (models) ->
+    redis = models.redis
 
-    messages_key = (room_name) -> keyify('rooms', room_name, 'messages')
+    keyify = (args...) -> ['lolgebra', args...].join(':')
 
     message_key = (id) -> keyify('messages', id)
+    messages_id_key = keyify('messages', '__id__')
 
-    class Room
+    models.Room = class Room
+        messagesKey: -> keyify('rooms', @name, 'messages')
+
         constructor: (name) ->
             @name = name
 
         getMessages: (start, end, cb) ->
-            redis.lrange messages_key(@name), start, end, (err, message_ids) ->
-                count = 0
-                received_messages = []
-                message_ids.each (id) ->
-                    redis.hgetall message_key(id), (message) ->
-                        count += 1
-                        received_messages[+id] = message
-                        if count == message_ids.length
-                            cb(received_messages)
+            redis.lrange @messagesKey(), start, end, (err, message_ids) ->
+              throw err if err
+
+              return cb(null, []) unless message_ids
+
+              count = 0
+              received_messages = []
+              message_ids.forEach (id) ->
+                redis.hgetall message_key(id), (err, message) ->
+                  console.log inspect(received_messages)
+                  return cb(err) if err
+
+                  count += 1
+                  received_messages[+id] = fixBuffers(message)
+                  if count == message_ids.length
+                    cb(null, received_messages.filter((e)->e))
+
+        post: (message, cb) ->
+          redis.incr messages_id_key, (err, id) =>
+            return cb(err) if err
+            args = []
+            Object.keys(message).forEach (key) ->
+              args[args.length] = key
+              args[args.length] = message[key]
+
+            console.log inspect(args)
+
+            redis.rpush @messagesKey(), id
+
+            redis.hmset redis, message_key(+id), args..., (err, data) ->
+                return cb(err) if err
+                cb(null, data)
