@@ -1,11 +1,11 @@
 Express = require 'express'
-IO = require 'socket.io'
 Eco = require 'eco'
 helpers = require './helpers'
 
 app = Express.createServer(
-  Express.logger()
   Express.bodyDecoder()
+  Express.logger()
+  Express.staticProvider(__dirname + '/public')
 )
 
 app.register '.eco'
@@ -13,7 +13,6 @@ app.register '.eco'
     Eco.render template, options.locals
 
 app.configure 'development', ->
-    app.use Express.staticProvider(__dirname + '/public')
 
 require('./models')(app)
 
@@ -31,4 +30,4 @@ app.get '/chat/:room', (req, res) ->
 
 require('./messages')(app)
 
-app.listen(8080)
+app.listen(3000)

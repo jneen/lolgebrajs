@@ -1,6 +1,23 @@
 (function($) {
-  var socket = window.socket = new io.Socket(),
-      myOwnMsgs = [];
+  var
+    socket = window.socket = new io.Socket(undefined, {
+      transports: [
+        'jsonp-polling'
+      ]
+    }),
+
+    myOwnMsgs = []
+  ;
+
+  socket.connect();
+
+  socket.on('connect', function() {
+    socket.send({type: 'init', name: USERNAME});
+  });
+
+  socket.on('message', function() {
+    console.log('message', arguments);
+  });
 
   $(document).ready(function() {
     var chatbox = $('#chatbox'), lastId, untilId;

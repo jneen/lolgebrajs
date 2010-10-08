@@ -12,6 +12,7 @@ module.exports = (models) ->
     messages_id_key = keyify('messages', '__id__')
 
     models.Room = class Room
+        pubSubKey: -> keyify('rooms', @name, 'pubsub')
         messagesKey: -> keyify('rooms', @name, 'messages')
 
         constructor: (name) ->
@@ -37,16 +38,21 @@ module.exports = (models) ->
 
         post: (message, cb) ->
           redis.incr messages_id_key, (err, id) =>
-            return cb(err) if err
-            args = []
-            Object.keys(message).forEach (key) ->
-              args[args.length] = key
-              args[args.length] = message[key]
+            try
+              return cb(err) if err
+              args = []
 
-            console.log inspect(args)
+              console.log inspect(message)
+              Object.keys(message).forEach (key) ->
+                args[args.length] = key
+                args[args.length] = message[key]
+
+              console.log inspect(args)
+            catch e
+              cb(e)
 
             redis.rpush @messagesKey(), id
 
-            redis.hmset redis, message_key(+id), args..., (err, data) ->
+            redis.hmset message_key(+id), args..., (err, data) ->
                 return cb(err) if err
                 cb(null, data)

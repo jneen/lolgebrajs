@@ -2,7 +2,7 @@
 <% @css '/css/chat.css' %>
 <% @js "http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" %>
 <% @js "http://laughinghan.github.com/mathquill/mathquill.js" %>
-<% @js "/socket.io/socket.io.js" %>
+<% @js "/js/socket.io.js" %>
 <% @js '/js/chat.js' %>
 
 <script type="text/javascript">
